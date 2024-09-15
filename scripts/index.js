@@ -5,19 +5,19 @@ function deleteCard(evt) {
   evt.target.closest('.card').remove();
 }
 
-function createCard (item) {
+function createCard (cardData) {
   const cardElement = templateCard.cloneNode(true);
   const cardImg = cardElement.querySelector('.card__image');
-  cardElement.querySelector('.card__title').textContent = item.name;
-  cardImg.src = item.link;
-  cardImg.alt = item.name;
+  cardElement.querySelector('.card__title').textContent = cardData.name;
+  cardImg.src = cardData.link;
+  cardImg.alt = cardData.name;
 
   const deleteCardBtn = cardElement.querySelector('.card__delete-button');
   deleteCardBtn.addEventListener('click', deleteCard);
   return cardElement
 }
 
-initialCards.forEach( item => {
-    const cardElement = createCard (item)
+initialCards.forEach( cardData => {
+    const cardElement = createCard (cardData)
     cardsContainer.append(cardElement);
 });
