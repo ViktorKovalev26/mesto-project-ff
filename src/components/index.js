@@ -1,13 +1,15 @@
 import '../pages/index.css';
-import { initialCards, cardsContainer, createCard } from './cards.js';
+import { initialCards } from './initialCards.js';
+import { createCard, toggleIsLiked, deleteCard } from './cards.js';
 import { openModal, closeModal } from './modal.js';
 
+const cardsContainer = document.querySelector('.places__list');
 const profileEditBtn = document.querySelector('.profile__edit-button');
 const popupEdit = document.querySelector('.popup_type_edit');
-const closeButton = document.querySelectorAll(".popup__close");
-const formElement = document.querySelector('form[name="edit-profile"]');
-const nameInput = formElement.querySelector(".popup__input_type_name");
-const jobInput = formElement.querySelector(".popup__input_type_description");
+const closeButtons = document.querySelectorAll(".popup__close");
+const profileForm = document.querySelector('form[name="edit-profile"]');
+const nameInput = profileForm.querySelector(".popup__input_type_name");
+const jobInput = profileForm.querySelector(".popup__input_type_description");
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 const popupNewCard = document.querySelector(".popup_type_new-card");
@@ -15,58 +17,64 @@ const profileAddBtn = document.querySelector(".profile__add-button");
 const formNewPlace = document.querySelector('form[name="new-place"]');
 const cardInput = formNewPlace.querySelector(".popup__input_type_card-name");
 const urlInput = formNewPlace.querySelector(".popup__input_type_url");
+const popupImage = document.querySelector('.popup_type_image');
+const popupImageZoom = popupImage.querySelector(".popup__image");
+const popupCaptionZoom = popupImage.querySelector(".popup__caption");
 
 function addPopupProfile() {
   openModal(popupNewCard);
-  formNewPlace.reset();
 }
 
-function fillPopupInputs() {
+function fillProfileInputs() {
   nameInput.value = profileTitle.textContent;
   jobInput.value = profileDescription.textContent;
 }
 
-function editPopupProfile() {
+function openProfilePopup() {
   openModal(popupEdit);
-  fillPopupInputs();
+  fillProfileInputs();
 }
 
-function editForm(evt) {
+function zoomPopupImg(evt) {
+  openModal(popupImage);
+  popupImageZoom.src = evt.target.src;
+  popupImageZoom.alt = evt.target.alt;
+  popupCaptionZoom.textContent = evt.target.alt;
+}
+
+function handleProfileFormSubmit(evt) {
   evt.preventDefault();
   const nameValue = nameInput.value;
   const jobValue = jobInput.value;
   profileTitle.textContent = nameValue;
   profileDescription.textContent = jobValue;
+  profileForm.reset();
   closeModal(popupEdit);
-  evt.removeEventListener('submit', editForm);
 }
 
-function addForm(evt) {
+function handleCardFormSubmit(evt) {
   evt.preventDefault();
-  const cardValue = cardInput.value;
-  const urlValue = urlInput.value;
   const newElement = {
-    name: cardValue,
-    link: urlValue
+    name: cardInput.value,
+    link: urlInput.value
   }
-  initialCards.unshift(newElement);
-  const cardElement = createCard (newElement);
+  const cardElement = createCard (newElement, toggleIsLiked, deleteCard, zoomPopupImg);
   cardsContainer.prepend(cardElement);
+  formNewPlace.reset();
   closeModal(popupNewCard);
-  evt.removeEventListener('submit', addForm);
 }
 
 initialCards.forEach( cardData => {
-  const cardElement = createCard (cardData);
+  const cardElement = createCard (cardData, toggleIsLiked, deleteCard, zoomPopupImg);
   cardsContainer.append(cardElement);
 });
 
 profileAddBtn.addEventListener('click', addPopupProfile);
-profileEditBtn.addEventListener('click', editPopupProfile);
-closeButton.forEach(function(cross) {
+profileEditBtn.addEventListener('click', openProfilePopup);
+closeButtons.forEach(function(cross) {
   cross.addEventListener("click", () => {
     closeModal(cross.closest('.popup'));
   })
 });
-formElement.addEventListener('submit', editForm);
-formNewPlace.addEventListener('submit', addForm);
+profileForm.addEventListener('submit', handleProfileFormSubmit);
+formNewPlace.addEventListener('submit', handleCardFormSubmit);
