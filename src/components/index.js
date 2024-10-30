@@ -5,7 +5,7 @@ import {
   openModal,
 } from '../components/modal.js';
 
-import { createCard as DOMCreateCard } from '../components/cards.js';
+import { createCard as DOMCreateCard } from '../components/card.js';
 
 import {
   APIGetInitialCards,
@@ -77,51 +77,27 @@ function renderLoading({ btnElement, isLoading }) {
 
 function handleCardLike({ cardId, btnElement, counterElement }) {
   btnElement.disabled = true;
-
-  if (btnElement.classList.contains('card__like-button_is-active')) {
-    APIUnLikeCard(cardId)
-      .then(({ likes }) => {
-        btnElement.classList.remove('card__like-button_is-active');
-
-        if (likes.length) {
-          counterElement.classList.add('card__like-counter_is-active');
-          counterElement.textContent = likes.length;
-        } else {
-          counterElement.classList.remove('card__like-counter_is-active');
-          counterElement.textContent = '';
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        btnElement.disabled = false;
-      });
-  } else {
-    APILikeCard(cardId)
-      .then(({ likes }) => {
-        btnElement.classList.add('card__like-button_is-active');
-
-        counterElement.classList.add('card__like-counter_is-active');
-        counterElement.textContent = likes.length;
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        btnElement.disabled = false;
-      });
-  }
-};
+  const likeMethod = btnElement.classList.contains('card__like-button_is-active') ? APIUnLikeCard : APILikeCard;
+  likeMethod(cardId) 
+    .then(({ likes }) => {
+      counterElement.classList.toggle('card__like-counter_is-active', likes.length); 
+      counterElement.textContent = likes.length || '';
+      btnElement.classList.toggle("card__like-button_is-active"); 
+    })
+  .catch(err => console.log(err))
+  .finally(() => { 
+    btnElement.disabled = false; 
+  });
+  };
 
 function handleCardDelete({ cardId, btnElement }) {
-    APIDeleteCard(cardId)
-      .then(() => {
-        btnElement.closest('.card').remove();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  APIDeleteCard(cardId)
+    .then(() => {
+      btnElement.closest('.card').remove();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 function handleCardFormSubmit(event) {
